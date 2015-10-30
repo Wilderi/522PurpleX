@@ -361,23 +361,24 @@ public class HexGrid : MonoBehaviour {
         if (waiting || (player == 1 && computerPlayer)) {
             return;
         }
-        GUI.Box(new Rect(10, 10, 90, 20), "Player " + (player + 1));
+        int oldFontSize = GUI.skin.box.fontSize;
+        GUI.skin.box.fontSize = 20;
         switch (turn) {
             case Turn.SELECT:
-                GUI.Box(new Rect(10, 40, 90, 20), "Select");
-                if (GUI.Button(new Rect(10, 70, 90, 20), "End Turn")) {
+                GUI.Box(new Rect(5, 5, 100, 70), "Select");
+                if (GUI.Button(new Rect(10, 40, 90, 20), "End Turn")) {
                     endTurn();
                 }
                 break;
             case Turn.MOVE:
-                GUI.Box(new Rect(10, 40, 90, 20), "Move");
-                if (GUI.Button(new Rect(10, 70, 90, 20), "Cancel Move")) {
+                GUI.Box(new Rect(5, 5, 100, 70), "Move");
+                if (GUI.Button(new Rect(10, 40, 90, 20), "Cancel Move")) {
                     unselect();
                 }
                 break;
             case Turn.ATTACK:
-                GUI.Box(new Rect(10, 40, 90, 20), "Attack");
-                if (GUI.Button(new Rect(10, 70, 90, 20), "Skip Attack")) {
+                GUI.Box(new Rect(5, 5, 100, 70), "Attack");
+                if (GUI.Button(new Rect(10, 40, 90, 20), "Skip Attack")) {
                     HexPosition.clearSelection();
                     selection = null;
                     if (mouse != null) {
@@ -388,6 +389,7 @@ public class HexGrid : MonoBehaviour {
                 }
                 break;
         }
+        GUI.skin.box.fontSize = oldFontSize;
     }
     /*
     void OnGUI () {
