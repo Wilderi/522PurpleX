@@ -9,7 +9,7 @@ public class PlayerControl : MonoBehaviour {
     int oldAmountMoney = 100;    // To handle smooth HUD updates
 
     public static int ownUnits = 1; // static to use in combat script
-    public static int workers = 1;
+    public static int workers = 4;
 
     public static int p1Units = 1;
     private static float p1UnitsFloat = 1;

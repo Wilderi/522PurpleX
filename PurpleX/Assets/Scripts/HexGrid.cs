@@ -101,6 +101,16 @@ public class HexGrid : MonoBehaviour {
 		return selectAttackable (attacker, attacker.Coordinates);
 	}
 
+    private int _getNumUnits(int player) {
+        int numUnits = 0;
+        foreach (Unit otherUnit in units) {
+            if (otherUnit.PLAYER == player) {
+                numUnits++;
+            }
+        }
+        return numUnits;
+    }
+
     private void _spawnOwnUnits(GameObject parent) {
         for(int i = 0; i < PlayerControl.ownUnits; i++) {
             Vector3 spawnPoint = new Vector3((i-(PlayerControl.ownUnits/2))*1.5f, 0, -1 * Random.Range(3, 6));
@@ -341,6 +351,10 @@ public class HexGrid : MonoBehaviour {
             } else {
                 GUI.Box(new Rect(10, 10, Screen.width - 20, Screen.height - 20), "You Lose! :(", style);
             }
+            PlayerControl.ownUnits = _getNumUnits(0);
+            PlayerControl.p1Units = _getNumUnits(1);
+            if (PlayerControl.ownUnits < 1) PlayerControl.ownUnits = 1;
+            if (PlayerControl.p1Units < 1) PlayerControl.p1Units = 1;
             StartCoroutine(_returnToMainScene());
             return;
         }
