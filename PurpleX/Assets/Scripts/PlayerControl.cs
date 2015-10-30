@@ -11,8 +11,8 @@ public class PlayerControl : MonoBehaviour {
     public static int ownUnits = 1; // static to use in combat script
     public static int workers = 4;
 
-    public static int p1Units = 1;
-    private static float p1UnitsFloat = 1;
+    public static float p1UnitsFloat = 1;
+    int p1Units = 1;
 
     int priceWorker = 70;
     int priceUnit = 50; 
