@@ -16,8 +16,8 @@ using System.Collections.Generic;
 public class HexGrid : MonoBehaviour {
 
 	public GameObject marker;
-    public GameObject unitsRoot;
-	public GameObject unitPrefab;
+    public GameObject unitPrefab1;
+	public GameObject unitPrefab2;
 	public GameObject obstacles;
 	private List<Unit> units = new List<Unit>();		//I should make this thread safe.
 	//public GameObject[] players;
@@ -103,27 +103,31 @@ public class HexGrid : MonoBehaviour {
 
     private void _spawnOwnUnits(GameObject parent) {
         for(int i = 0; i < PlayerControl.ownUnits; i++) {
-            Vector3 spawnPoint = new Vector3(i + Random.Range(1, 5), 0, -1 * Random.Range(1, 5));
-            GameObject tmp = (GameObject)Instantiate(unitPrefab, spawnPoint, Quaternion.identity);
+            Vector3 spawnPoint = new Vector3((i-(PlayerControl.ownUnits/2))*1.5f, 0, -1 * Random.Range(3, 6));
+            GameObject tmp = (GameObject)Instantiate(unitPrefab2, spawnPoint, Quaternion.identity);
             tmp.transform.parent = parent.transform;
             tmp.name = "ownUnit"+i;
         }
     }
 
     private void _spawnOtherUnits(GameObject parent) {
-
+        for (int i = 0; i < PlayerControl.p1Units; i++) {
+            Vector3 spawnPoint = new Vector3((-i+(PlayerControl.p1Units/2))*1.5f, 0, Random.Range(3, 6));
+            GameObject tmp = (GameObject)Instantiate(unitPrefab1, spawnPoint, Quaternion.identity);
+            tmp.transform.parent = parent.transform;
+            tmp.name = "otherUnit" + i;
+        }
     }
 
     void Start () {
         //Spawn the units
-        /*
         GameObject unitsRoot = new GameObject();
         unitsRoot.name = "UnitsCreated";
         _spawnOwnUnits(unitsRoot);
         _spawnOtherUnits(unitsRoot);
-        */
 		unitsRoot.BroadcastMessage ("SetGrid", this);
 
+        Debug.Log("Loaded Scene by calling start");
 		//timeout = MAX_TIME;
 		HexPosition.setColor("Path", Color.yellow, 1);
 		HexPosition.setColor("Selection", Color.green, 2);
@@ -136,9 +140,9 @@ public class HexGrid : MonoBehaviour {
 			child.position = position.getPosition();
 			position.flag("Obstacle");
 		}
-        ai = new AI(units, 1);
         selectSelectable();
-        Debug.Log(PlayerControl.ownUnits);
+        ai = new AI(units, 1);
+        
     }
 	
 	private void select () {
@@ -320,60 +324,113 @@ public class HexGrid : MonoBehaviour {
 			}
 		}
 	}
-	
-	void OnGUI () {
-		if (!modeSelected) {
-			if (GUI.Button (new Rect (10, 10, 90, 20), "1 Player")) {
-				selectSelectable ();
-				computerPlayer = true;
-				modeSelected = true;
-				ai = new AI(units, 1);
-				return;
-			}
-			if (GUI.Button (new Rect (10, 40, 90, 20), "2 Player")) {
-				selectSelectable ();
-				computerPlayer = false;
-				modeSelected = true;
-				return;
-			}
-			return;
-		}
-		if (gameOver) {
-			GUIStyle style = new GUIStyle ();
-			style.fontSize = 72;
-			style.alignment = TextAnchor.MiddleCenter;
-			GUI.Box (new Rect (10, 10, Screen.width-20, Screen.height-20), "Player " + (player + 1) + " Wins!", style);
-			return;
-		}
-		if (waiting || (player == 1 && computerPlayer)) {
-			return;
-		}
-		GUI.Box (new Rect (10, 10, 90, 20), "Player " + (player + 1));
-		switch (turn) {
-		case Turn.SELECT:
-			GUI.Box (new Rect (10, 40, 90, 20), "Select");
-			if (GUI.Button (new Rect (10, 70, 90, 20), "End Turn")) {
-				endTurn ();
-			}
-			break;
-		case Turn.MOVE:
-			GUI.Box (new Rect (10, 40, 90, 20), "Move");
-			if (GUI.Button (new Rect (10, 70, 90, 20), "Cancel Move")) {
-				unselect ();
-			}
-			break;
-		case Turn.ATTACK:
-			GUI.Box (new Rect (10, 40, 90, 20), "Attack");
-			if (GUI.Button (new Rect (10, 70, 90, 20), "Skip Attack")) {
-				HexPosition.clearSelection ();
-				selection = null;
-				if (mouse != null) {
-					mouse.select ("Cursor");
-				}
-				selectSelectable ();
-				turn = Turn.SELECT;
-			}
-			break;
-		}
-	}
-}
+
+    IEnumerator _returnToMainScene() {
+        yield return new WaitForSeconds(3);
+        Application.LoadLevel("Terrain");
+    }
+
+
+    void OnGUI() {
+        if (gameOver) {
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 72;
+            style.alignment = TextAnchor.MiddleCenter;
+            if (player == 0) {
+                GUI.Box(new Rect(10, 10, Screen.width - 20, Screen.height - 20), "You Win!", style);
+            } else {
+                GUI.Box(new Rect(10, 10, Screen.width - 20, Screen.height - 20), "You Lose! :(", style);
+            }
+            StartCoroutine(_returnToMainScene());
+            return;
+        }
+        if (waiting || (player == 1 && computerPlayer)) {
+            return;
+        }
+        GUI.Box(new Rect(10, 10, 90, 20), "Player " + (player + 1));
+        switch (turn) {
+            case Turn.SELECT:
+                GUI.Box(new Rect(10, 40, 90, 20), "Select");
+                if (GUI.Button(new Rect(10, 70, 90, 20), "End Turn")) {
+                    endTurn();
+                }
+                break;
+            case Turn.MOVE:
+                GUI.Box(new Rect(10, 40, 90, 20), "Move");
+                if (GUI.Button(new Rect(10, 70, 90, 20), "Cancel Move")) {
+                    unselect();
+                }
+                break;
+            case Turn.ATTACK:
+                GUI.Box(new Rect(10, 40, 90, 20), "Attack");
+                if (GUI.Button(new Rect(10, 70, 90, 20), "Skip Attack")) {
+                    HexPosition.clearSelection();
+                    selection = null;
+                    if (mouse != null) {
+                        mouse.select("Cursor");
+                    }
+                    selectSelectable();
+                    turn = Turn.SELECT;
+                }
+                break;
+        }
+    }
+    /*
+    void OnGUI () {
+        if (!modeSelected) {
+            if (GUI.Button (new Rect (10, 10, 90, 20), "1 Player")) {
+                selectSelectable ();
+                computerPlayer = true;
+                modeSelected = true;
+                ai = new AI(units, 1);
+                return;
+            }
+            if (GUI.Button (new Rect (10, 40, 90, 20), "2 Player")) {
+                selectSelectable ();
+                computerPlayer = false;
+                modeSelected = true;
+                return;
+            }
+            return;
+        }
+        if (gameOver) {
+            GUIStyle style = new GUIStyle ();
+            style.fontSize = 72;
+            style.alignment = TextAnchor.MiddleCenter;
+            GUI.Box (new Rect (10, 10, Screen.width-20, Screen.height-20), "Player " + (player + 1) + " Wins!", style);
+            StartCoroutine(_returnToMainScene());
+            return;
+        }
+        if (waiting || (player == 1 && computerPlayer)) {
+            return;
+        }
+        GUI.Box (new Rect (10, 10, 90, 20), "Player " + (player + 1));
+        switch (turn) {
+        case Turn.SELECT:
+            GUI.Box (new Rect (10, 40, 90, 20), "Select");
+            if (GUI.Button (new Rect (10, 70, 90, 20), "End Turn")) {
+                endTurn ();
+            }
+            break;
+        case Turn.MOVE:
+            GUI.Box (new Rect (10, 40, 90, 20), "Move");
+            if (GUI.Button (new Rect (10, 70, 90, 20), "Cancel Move")) {
+                unselect ();
+            }
+            break;
+        case Turn.ATTACK:
+            GUI.Box (new Rect (10, 40, 90, 20), "Attack");
+            if (GUI.Button (new Rect (10, 70, 90, 20), "Skip Attack")) {
+                HexPosition.clearSelection ();
+                selection = null;
+                if (mouse != null) {
+                    mouse.select ("Cursor");
+                }
+                selectSelectable ();
+                turn = Turn.SELECT;
+            }
+            break;
+        }
+    }
+    */
+    }

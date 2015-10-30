@@ -108,7 +108,8 @@ public class Unit : MonoBehaviour {
 	}
 	
 	public void defend (float strength, float variation) {
-		int damage = NegativeBinomialDistribution.fromMeanAndStandardDeviation(strength-1, variation)+1;
+        // int damage = NegativeBinomialDistribution.fromMeanAndStandardDeviation(strength-1, variation)+1;
+        int damage = Mathf.CeilToInt(strength + Random.Range(-variation, variation));
 		hp -= damage;
 		if (hp <= 0) {
 			position.remove ("Unit");
