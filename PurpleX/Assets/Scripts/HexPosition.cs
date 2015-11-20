@@ -476,16 +476,16 @@ public class HexPosition : System.IEquatable<HexPosition> {
 			return false;
 		}
 	}
-	
-	/// <summary>
-	/// Sets the color and layer for each type of selection. Layer should be unique.
-	/// </summary>
-	/// <param name="name">Name of the selection type.</param>
-	/// <param name="color">Color of the selection type.</param>
-	/// <param name="layer">Layer of the selection type.</param>
-	public static void setColor(string name, Color color, int layer) {
-		selectionTypes.Add(name, new Pair<Color, int>(color, layer));
-	}
+
+    /// <summary>
+    /// Sets the color and layer for each type of selection. Layer should be unique.
+    /// </summary>
+    /// <param name="name">Name of the selection type.</param>
+    /// <param name="color">Color of the selection type.</param>
+    /// <param name="layer">Layer of the selection type.</param>
+    public static void setColor(string name, Color color, int layer) {
+        selectionTypes[name] = new Pair<Color, int>(color, layer);
+    }
 	
 	public override string ToString () {
 		return string.Format ("(u={0},\tv={1})", u, v);

@@ -19,6 +19,7 @@ public class HexGrid : MonoBehaviour {
     public GameObject unitPrefab1;
 	public GameObject unitPrefab2;
 	public GameObject obstacles;
+
 	private List<Unit> units = new List<Unit>();		//I should make this thread safe.
 	//public GameObject[] players;
 	
