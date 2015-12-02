@@ -1,27 +1,24 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public class PlayerControl : MonoBehaviour {
     public Text hud;
 
-    private static float money = 100;
+    public static float money = 100;
     int oldAmountMoney = 100;    // To handle smooth HUD updates
 
     public static int ownUnits = 1; // static to use in combat script
     public static int workers = 4;
 
-    public static float p1UnitsFloat = 1;
-    int p1Units = 1;
+    public static Village selectedEnemy = null;
 
     int priceWorker = 70;
     int priceUnit = 50; 
 
-    float speed = 0.5f;
+    public int speed = 50;
 
+    // display overview windows
     bool showVillage = false;
-    string villageName;
-
     bool showOwn = false;
 
     Transform mousePos;
@@ -37,43 +34,37 @@ public class PlayerControl : MonoBehaviour {
         Ray ray = GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100))
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (hit.collider.gameObject.tag == "Village1")
-                {
-                    villageName = "Warlord";
-                    showVillage = true;
-                    showOwn = false;
-                }
-                if (hit.collider.gameObject.tag == "Player") {
+        if (Physics.Raycast(ray, out hit, 100)) {
+            if (Input.GetMouseButtonDown(0)) {
+                GameObject hitObj = hit.collider.gameObject;
+                if(hitObj.tag == "Player") {
                     showOwn = true;
                     showVillage = false;
+                    return;
+                } else if (hitObj.tag == "Enemy") {
+                    selectedEnemy = hitObj.GetComponent<Village>();
+                    showOwn = false;
+                    showVillage = true;
                 }
             }
-
         }
 
-        money += speed * Time.deltaTime * Mathf.Sqrt(workers);
+        money += speed * Time.deltaTime * Mathf.Sqrt(workers) * 0.01f;
         if (oldAmountMoney != (int)money) {
             oldAmountMoney = (int)money;
             updateHUD();
-        }
-
-        p1UnitsFloat += Time.deltaTime * Random.Range(0, 20) * 0.001f * Mathf.Sqrt(workers);
-        if(p1Units != (int) p1UnitsFloat) {
-            p1Units = (int)p1UnitsFloat;
         }
     }
 
     void OnGUI() {
         if (showVillage) {
-            GUI.Box(new Rect(5, 5, 110, 90), villageName + "\n" + "Units: "+p1Units);
+            GUI.Box(new Rect(5, 5, 110, 90), selectedEnemy.title + "\n" + "Units: "+ selectedEnemy.Units);
+            if (selectedEnemy.Conquered) GUI.enabled = false;
             if (GUI.Button(new Rect(10, 45, 100, 20), "Attack")) {
                 showVillage = false;
                 Application.LoadLevel("HexGrid");
             }
+            GUI.enabled = true;
             if (GUI.Button(new Rect(10, 70, 100, 20), "Close")) {
                 showVillage = false;
             }
@@ -114,5 +105,29 @@ public class PlayerControl : MonoBehaviour {
 
     void updateHUD() {
         hud.text = "Money: " + oldAmountMoney + "  Units: " + ownUnits + "  Worker: " + workers;
+    }
+
+    internal static void updateEnemyUnits(int newAmount) {
+        if (newAmount > 0) {
+            selectedEnemy.Units = newAmount;
+        } else {
+            selectedEnemy.Conquered = true;
+        }
+        /*
+        int diff = selectedEnemyUnits - newAmount;
+        if (diff + 1 >= selectedEnemyUnits) diff = selectedEnemyUnits - 1;
+        print(diff + " " + selectedEnemyUnits + " " + newAmount + " " + p3UnitsFloat);
+        switch (selectedEnemy) {
+            case 1:
+                p1UnitsFloat -= diff ;
+                break;
+            case 2:
+                p2UnitsFloat -= diff;
+                break;
+            case 3:
+                p3UnitsFloat -= diff;
+                break;
+        }
+        */
     }
 }

@@ -122,7 +122,7 @@ public class HexGrid : MonoBehaviour {
     }
 
     private void _spawnOtherUnits(GameObject parent) {
-        int spawnUnits = (int)PlayerControl.p1UnitsFloat;
+        int spawnUnits = PlayerControl.selectedEnemy.Units;
         for (int i = 0; i < spawnUnits; i++) {
             Vector3 spawnPoint = new Vector3((-i+(spawnUnits/2))*1.5f, 0, Random.Range(3, 6));
             GameObject tmp = (GameObject)Instantiate(unitPrefab1, spawnPoint, Quaternion.identity);
@@ -339,6 +339,7 @@ public class HexGrid : MonoBehaviour {
 
     IEnumerator _returnToMainScene() {
         yield return new WaitForSeconds(3);
+        PlayerControl.updateEnemyUnits(_getNumUnits(1));
         Application.LoadLevel("Terrain");
     }
 
@@ -348,15 +349,14 @@ public class HexGrid : MonoBehaviour {
             GUIStyle style = new GUIStyle();
             style.fontSize = 72;
             style.alignment = TextAnchor.MiddleCenter;
-            if (player == 0) {
+            if (_getNumUnits(1) == 0) {
                 GUI.Box(new Rect(10, 10, Screen.width - 20, Screen.height - 20), "You Win!", style);
             } else {
                 GUI.Box(new Rect(10, 10, Screen.width - 20, Screen.height - 20), "You Lose! :(", style);
             }
             PlayerControl.ownUnits = _getNumUnits(0);
-            PlayerControl.p1UnitsFloat -= ((int)PlayerControl.p1UnitsFloat - _getNumUnits(1));
             if (PlayerControl.ownUnits < 1) PlayerControl.ownUnits = 1;
-            if (PlayerControl.p1UnitsFloat < 1) PlayerControl.p1UnitsFloat = 1;
+
             StartCoroutine(_returnToMainScene());
             return;
         }
