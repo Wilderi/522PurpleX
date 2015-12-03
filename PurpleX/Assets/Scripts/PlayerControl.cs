@@ -1,16 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerControl : MonoBehaviour {
     public Text hud;
 
-    public static float money = 100;
-    int oldAmountMoney = 100;    // To handle smooth HUD updates
+    public static float money;
+    int oldAmountMoney;    // To handle smooth HUD update
+    int ownUnits;
+    int workers;
 
-    public static int ownUnits = 1; // static to use in combat script
-    public static int workers = 4;
-
-    public static Village selectedEnemy = null;
+    private int selectedEnemy = 0;
+    private static Village selectedVillage = null;
 
     int priceWorker = 70;
     int priceUnit = 50; 
@@ -25,7 +26,31 @@ public class PlayerControl : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        loadGameValues();
         updateHUD();
+    }
+
+    private void loadGameValues() {
+        money = GameMaker.Instance.money;
+        ownUnits = GameMaker.Instance.units;
+        workers = GameMaker.Instance.workers;
+        selectedEnemy = GameMaker.Instance.selectedEnemy;
+    }
+
+    private void saveGameValues() {
+        GameMaker.Instance.money = money;
+        GameMaker.Instance.units = ownUnits;
+        GameMaker.Instance.workers = workers;
+        GameMaker.Instance.selectedEnemy = selectedEnemy;
+
+        GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
+        int counter = 0;
+        foreach (GameObject enemyObj in enemyObjs) {
+            Village village = enemyObj.GetComponent<Village>();
+            GameMaker.Instance.enemysUnits[counter] = village.Units;
+            GameMaker.Instance.enemysConquered[counter] = village.conquered;
+            counter++;
+        }
     }
 
     // Update is called once per frame
@@ -42,7 +67,14 @@ public class PlayerControl : MonoBehaviour {
                     showVillage = false;
                     return;
                 } else if (hitObj.tag == "Enemy") {
-                    selectedEnemy = hitObj.GetComponent<Village>();
+                    GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
+                    int counter = 0;
+                    foreach (GameObject enemyObj in enemyObjs) {
+                        if (enemyObj == hitObj) break;
+                        counter++;
+                    }
+                    selectedEnemy = counter;
+                    selectedVillage = hitObj.GetComponent<Village>();
                     showOwn = false;
                     showVillage = true;
                 }
@@ -58,10 +90,10 @@ public class PlayerControl : MonoBehaviour {
 
     void OnGUI() {
         if (showVillage) {
-            GUI.Box(new Rect(5, 5, 110, 90), selectedEnemy.title + "\n" + "Units: "+ selectedEnemy.Units);
-            if (selectedEnemy.Conquered) GUI.enabled = false;
+            GUI.Box(new Rect(5, 5, 110, 90), selectedVillage.title + "\n" + "Units: "+ selectedVillage.Units);
+            if (selectedVillage.conquered) GUI.enabled = false;
             if (GUI.Button(new Rect(10, 45, 100, 20), "Attack")) {
-                showVillage = false;
+                saveGameValues();
                 Application.LoadLevel("HexGrid");
             }
             GUI.enabled = true;
@@ -109,25 +141,9 @@ public class PlayerControl : MonoBehaviour {
 
     internal static void updateEnemyUnits(int newAmount) {
         if (newAmount > 0) {
-            selectedEnemy.Units = newAmount;
+            selectedVillage.Units = newAmount;
         } else {
-            selectedEnemy.Conquered = true;
+            selectedVillage.conquered = true;
         }
-        /*
-        int diff = selectedEnemyUnits - newAmount;
-        if (diff + 1 >= selectedEnemyUnits) diff = selectedEnemyUnits - 1;
-        print(diff + " " + selectedEnemyUnits + " " + newAmount + " " + p3UnitsFloat);
-        switch (selectedEnemy) {
-            case 1:
-                p1UnitsFloat -= diff ;
-                break;
-            case 2:
-                p2UnitsFloat -= diff;
-                break;
-            case 3:
-                p3UnitsFloat -= diff;
-                break;
-        }
-        */
     }
 }
