@@ -134,6 +134,10 @@ public class PlayerControl : MonoBehaviour {
             if (GUI.Button(new Rect(left + 5, 80, 130, 20), "Close")) {
                 showOwn = false;
             }
+			GUI.enabled = true;
+			if (GUI.Button(new Rect(left + 5, 100, 130, 20), "Quit Game")) {
+				Application.Quit();
+			}
         }
     }
 
