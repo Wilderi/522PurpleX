@@ -94,7 +94,9 @@ public class PlayerControl : MonoBehaviour {
             if (selectedVillage.conquered) GUI.enabled = false;
             if (GUI.Button(new Rect(10, 45, 100, 20), "Attack")) {
                 saveGameValues();
-                Application.LoadLevel("HexGrid");
+				string[] zones = new string[4] { "HexGrid", "HexGrid2", "Hexy", "Hixe" };
+				int random=UnityEngine.Random.Range(0,4);
+				Application.LoadLevel(zones[random]);
             }
             GUI.enabled = true;
             if (GUI.Button(new Rect(10, 70, 100, 20), "Close")) {
